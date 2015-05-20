@@ -1,0 +1,6 @@
+{
+	"id": "org.nativescript.TNSGoogleMaps",
+	"tns-ios": {
+		"version": "1.0.1"
+	}
+}
