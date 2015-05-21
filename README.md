@@ -88,4 +88,115 @@ function createMapView(args) {
 exports.createMapView = createMapView;
 ```
 
+## Using CocoaPods
+![GoogleMaps](Screenshots/CocoaPods.png)
 
+#### CocoaPods can now Use Frameworks
+Lets create a NativeScript project:
+
+```bash
+$ tns create TNSCocoaPods
+$ cd TNSCocoaPods
+$ tns platform add ios
+$ tns run ios --emulator
+```
+
+CocoaPods now supports the `use_frameworks!` statement that will generate a dynamic shared framework for the pods. Dynamic frameworks are a first class citizen in the NativeScript framework.
+
+Like in the GoogleMaps example, you will work with the Xcode project located in `TNSCocoaPods\platforms\ios\TNSCocoaPods.xcodeproj` to set up the libraries.
+
+CocoaPods will require a podfile located at `TNSCocoaPods\platforms\ios\Podfile`. We will add the following libraries:
+```
+platform :ios, '8.0'
+use_frameworks!
+
+target 'TNSCocoaPods' do
+	pod 'iCarousel'
+	pod 'FontAwesome+iOS'
+	pod 'AFNetworking'
+end
+```
+
+Then at `TNSCocoaPods\platforms\ios\` run:
+``` bash
+$ pod install
+```
+
+This will install all cocoa pods, create an Xcode workspace and set the required dependencies.
+> **NOTE:** From that point on, you will have to open the generated `TNSCocoaPods.xcworkspace` and work with it. In future we will have to update the NativeScript CLI to build using the workspace instead the project.
+
+> **NOTE:** You will have to set add the `$(inherited)` flag in the Other Linker Flags of the _TNSCocoaPods_ target in both the Debug and Release configurations.
+
+Since the pods will be put in dynamic framework our metadata generator will build metadata from their headers and expose their Objective-C APIs in the JavaScript runtime.
+
+We will set a simple carousel. Similar to the Google Maps example add the following UI in `TNSCocoaPods\app\main-page.xml`:
+```XML
+<Page xmlns="http://www.nativescript.org/tns.xsd" loaded="pageLoaded">
+  <GridLayout rows="auto, auto, auto, *">
+    <Label row="0" text="Tap the button" cssClass="title"/>
+    <Button row="1" text="TAP" tap="{{ tapAction }}" />
+    <Label row="2" text="{{ message }}" cssClass="message" textWrap="true"/>
+    <Placeholder row="3" creatingView="createCarouselView" />
+  </GridLayout>
+</Page>
+```
+
+And the following JavaScript in `TNSCocoaPods\app\main-page.js` to integrate the carousel in the UI:
+``` JavaScript
+var vmModule = require("./main-view-model");
+function pageLoaded(args) {
+    var page = args.object;
+    page.bindingContext = vmModule.mainViewModel;
+}
+exports.pageLoaded = pageLoaded;
+
+var CarouselData = NSObject.extend({
+    init: function() {
+        NSObject.prototype.init.apply(this, arguments);
+
+        this._items = ['4zSb0qS', 'jCUvdej', 'bq7JddZ', 'K815GK5', 'GTeMJud', 'SEUNWpX'];
+        this._placeholder = UIImage.imageWithIconBackgroundColorIconColorIconScaleAndSize("icon-spinner", UIColor.clearColor(), UIColor.blackColor(), 1, CGSizeMake(150, 150));
+
+        return this;
+    },
+
+    numberOfItemsInCarousel: function(carousel) {
+    	console.log("Numbers of items: " + this._items.length);
+        return this._items.length;
+    },
+
+    carouselViewForItemAtIndexReusingView: function(carousel, index, view) {
+    	console.log("Item at index: " + index);
+        if (!view) {
+            view = new UIImageView(CGRectMake(0, 0, 280, 175));
+            view.setImageWithURLPlaceholderImage(NSURL.URLWithString('http://i.imgur.com/' + this._items[index] + '.jpg'), this._placeholder);
+            view.contentMode = UIViewContentMode.UIViewContentModeScaleAspectFit;
+        }
+
+        return view;
+    }
+}, {
+    protocols: [iCarouselDataSource, iCarouselDelegate]
+});
+
+var carousel;
+var carouselData;
+
+function createCarouselView(args) {
+	carousel = new iCarousel();
+    carousel.type = iCarouselType.iCarouselTypeCoverFlow2;
+
+    carouselData = CarouselData.alloc().init();
+    
+    carousel.delegate = carouselData;
+    carousel.dataSource = carouselData;
+    
+    args.view = carousel;
+    console.log("Created carousel: " + carousel);
+}
+exports.createCarouselView = createCarouselView;
+```
+
+Open the `platforms\ios\TNSCocoaPods.xcworkspace` and run in simulator.
+
+Cocoa pods integration with NativeScript for iOS will be quite smooth.
