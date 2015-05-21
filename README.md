@@ -125,9 +125,9 @@ $ pod install
 This will install all cocoa pods, create an Xcode workspace and set the required dependencies.
 > **NOTE:** From that point on, you will have to open the generated `TNSCocoaPods.xcworkspace` and work with it. In future we will have to update the NativeScript CLI to build using the workspace instead the project.
 
-> **NOTE:** You will have to set add the `$(inherited)` flag in the Other Linker Flags of the _TNSCocoaPods_ target in both the Debug and Release configurations.
+> **NOTE:** You will have to add the `$(inherited)` flag in the Other Linker Flags of the _TNSCocoaPods_ target in both the Debug and Release configurations.
 
-Since the pods will be put in dynamic framework our metadata generator will build metadata from their headers and expose their Objective-C APIs in the JavaScript runtime.
+Since the pods will generate dynamic framework our metadata generator will build metadata from their headers and expose their Objective-C APIs in the JavaScript runtime without extra manual work.
 
 We will set a simple carousel. Similar to the Google Maps example add the following UI in `TNSCocoaPods\app\main-page.xml`:
 ```XML
