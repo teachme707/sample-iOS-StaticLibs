@@ -1,0 +1,6 @@
+framework module Pods_TNSCocoaPods {
+  umbrella header "Pods-TNSCocoaPods-umbrella.h"
+
+  export *
+  module * { export * }
+}
