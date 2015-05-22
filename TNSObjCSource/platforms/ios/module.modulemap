@@ -1,0 +1,6 @@
+module TNSObjCSource {
+	umbrella "TNSObjCSource"
+	explicit module * {
+		export *
+	}
+}

@@ -200,3 +200,53 @@ exports.createCarouselView = createCarouselView;
 Open the `platforms\ios\TNSCocoaPods.xcworkspace` and run in simulator.
 
 Cocoa pods integration with NativeScript for iOS will be quite smooth.
+
+## Consuming Objective-C Code in the Project
+We will create yet another project:
+```bash
+$ tns create TNSObjCSource
+$ cd TNSObjCSource
+$ tns platform add ios
+$ tns run ios --emulator
+```
+Our metadata generator will generate metadata for headers that are included in modules with module maps. Adding the following modulemap near the Xcode project in `TNSObjCSource/platforms/ios/module.modulemap`:
+```
+module TNSObjCSource {
+	umbrella "TNSObjCSource"
+	explicit module * {
+		export *
+	}
+}
+```
+Will create the TNSObjCSource module and each header within the project folder will be consider a sub-module.
+
+We will add a simple Objective-C class, TNSTrace.h:
+``` Objective-C
+#import <Foundation/Foundation.h>
+@interface TNSTrace : NSObject
+- (void) trace;
+@end
+```
+And its implementation TNSTrace.m:
+``` Objective-C
+#import "TNSTrace.h"
+@implementation TNSTrace
+- (void) trace {
+    NSLog(@"Trace!");
+}
+@end
+```
+And we will be able to call it from JavaScript in app.js:
+``` JavaScript
+var tracer = TNSTrace.alloc().init();
+tracer.trace();
+
+var application = require("application");
+application.mainModule = "main-page";
+application.cssFile = "./app.css";
+application.start();
+```
+
+> **NOTE:** We can add such module map in the project template so that the support for objective-c code will be quite straight forward. However the benefit of such loose Objective-C code is questionable.
+
+
